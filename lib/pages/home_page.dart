@@ -122,6 +122,8 @@ class HomePage extends StatelessWidget {
                   padding: EdgeInsets.only(top: 10),
                   child: InkWell(
                     onTap: () {
+                      // final data = await movieProvider.fetchMovies();
+                      // print(data.first.fullTitle);
                       Navigator.push(
                         context,
                         MaterialPageRoute(

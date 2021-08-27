@@ -1,10 +1,21 @@
-import 'package:flutter_application_2/widgets/name_section.dart';
+import 'package:flutter_application_2/models/movie_model.dart';
+import 'package:flutter_application_2/repository/movies_repository.dart';
+import 'package:flutter_application_2/widgets/circle_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/widgets/important_friends.dart';
-import 'package:flutter_application_2/widgets/search.dart';
-import 'package:flutter_application_2/widgets/add_qr_ad_friend.dart';
 
-class MyFriendsList extends StatelessWidget {
+class MyFriendsList extends StatefulWidget {
+  @override
+  _MyFriendsListState createState() => _MyFriendsListState();
+}
+
+class _MyFriendsListState extends State<MyFriendsList> {
+  late MoviesRepository _moviesRepository;
+  @override
+  void initState() {
+    super.initState();
+    _moviesRepository = MoviesRepository();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,39 +34,50 @@ class MyFriendsList extends StatelessWidget {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 20, right: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Search(
-              text: 'Поиск',
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                AddQrAndFriend(
-                  iconLabel: Icons.qr_code_scanner,
-                  text: 'Cканировать QR',
-                ),
-                AddQrAndFriend(
-                  iconLabel: Icons.person_add,
-                  text: 'Добавить друга',
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 15),
-              child: NameSection(text: 'Важные'),
-            ),
-            ImportantFriends(),
-            Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 15),
-              child: NameSection(text: 'Возможные друзья'),
-            ),
-          ],
+      body: Center(
+        child: FutureBuilder<List<MovieModel>>(
+          future: _moviesRepository.getAllMovies(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    final item = snapshot.data![index];
+
+                    return Column(
+                      children: [
+                        CircleImage(
+                          size: 360,
+                          rudius: 5,
+                          imageUrl: item.image,
+                        ),
+                        Text(item.fullTitle),
+                      ],
+                    );
+                  });
+            } else if (snapshot.hasError) {
+              return Text('${snapshot.error}');
+            }
+
+            // By default, show a loading spinner.
+            return const CircularProgressIndicator();
+          },
         ),
       ),
+
+      // child: Column(
+      //   children: [
+      //     CircleImage(
+      //       size: 360,
+      //       rudius: 5,
+      //       imageUrl:
+      //           'https://sun9-31.userapi.com/impf/c857436/v857436384/d7c5/JU6w-Tj0gPs.jpg?size=1280x852&quality=96&sign=731fd76a8a995ed0be7e84572cd3a22f&type=album',
+      //     ),
+      //     Text(''),
+      //     Text(''),
+      //   ],
+      // ),
+
       bottomNavigationBar: BottomAppBar(),
     );
   }
